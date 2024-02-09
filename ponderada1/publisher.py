@@ -12,8 +12,10 @@ client.connect("localhost", 1891, 60)
 # Função para gerar uma medição aleatória
 def generate_measurement():
     measurement = {
-        "medicao": f"{int(random.uniform(0, 1280))} W/m2",  # Gera um valor de medição aleatório dentro da faixa 0 a 1280 W/m2
-        "espectral": f"{random.randint(300, 1100)} nm",  # Gera um valor aleatório dentro da faixa espectral 300 a 1100 nm
+        "medicao_valor": int(random.uniform(0, 1280)),  # Gera um valor de medição aleatório dentro da faixa 0 a 1280
+        "medicao_unidade": "W/m2",  # Unidade de medição
+        "espectral_valor": random.randint(300, 1100),  # Gera um valor aleatório dentro da faixa espectral 300 a 1100 nm
+        "espectral_unidade": "nm",  # Unidade do alcance espectral
     }
     return measurement
 
