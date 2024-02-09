@@ -25,4 +25,4 @@ python3 publisher.py
 
 Isso iniciará o script que publicará mensagens JSON simuladas para o tópico MQTT no intervalo definido. O script imprimirá no terminal cada mensagem que for publicada.
 
-Segue vídeo para ver minha solução funcionando. Basta clicar [aqui](https://youtu.be/j-TWth_Fpzg)
+Segue vídeo para ver minha solução funcionando. Basta clicar [aqui](https://youtu.be/RBNywO2PM0E)
