@@ -9,4 +9,4 @@ pyTdd.egg-info/dependency_links.txt
 pyTdd.egg-info/not-zip-safe
 pyTdd.egg-info/requires.txt
 pyTdd.egg-info/top_level.txt
-tests/test_calculator.py
+tests/test_communication.py
