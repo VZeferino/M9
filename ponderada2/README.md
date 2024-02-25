@@ -22,6 +22,6 @@ pytest,
 flake8 e
 mypy.
 
-Assim os testes serão iniciados. 
+Assim os testes serão iniciados ao mesmo tempo. 
 
 Segue vídeo para ver minha solução funcionando. Basta clicar [aqui](https://youtu.be/7PO8NBFy_7w)
