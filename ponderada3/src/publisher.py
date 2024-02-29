@@ -1,7 +1,7 @@
 import os
-import time
 from dotenv import load_dotenv
 import paho.mqtt.client as paho
+from paho import mqtt
 
 load_dotenv() # Le variáveis de ambiente do arquivo .env
 
@@ -28,23 +28,16 @@ client = paho.Client(paho.CallbackAPIVersion.VERSION2, "Publisher",
 client.on_connect = on_connect
 
 # Configurações de TLS
-client.tls_set(tls_version=paho.ssl.PROTOCOL_TLS)
+client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 client.username_pw_set(username, password)  # Configuração da autenticação
+
+client.on_message = on_message
+client.on_publish = on_publish
 
 # Conexão ao broker
 client.connect(broker_address, port=port)
 
-client.loop_start()
+client.publish(topic, payload="Hello", qos=1)
 
-# Publica várias mensagens
-for i in range(4):
-    message = f"hello{i}"
-    result = client.publish(topic, payload=message, qos=1)
-    status = result[0]
-    if status == 0:
-        print(f"Sent `{message}` to topic `{topic}`")
-    else:
-        print(f"Failed to send message to topic `{topic}`")
-    time.sleep(1)  # Espera um pouco antes de enviar a próxima mensagem
-
-client.loop_stop()
+# Loop de espera por mensagens
+client.loop_forever()

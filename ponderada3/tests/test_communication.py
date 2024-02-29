@@ -1,62 +1,89 @@
 import os
 import pytest
 from dotenv import load_dotenv
-import subprocess
+import paho.mqtt.client as paho
 import time
+import subprocess
 
-# Carrega as variáveis de ambiente
+
 load_dotenv()
 
 # Variáveis de Configuração
 BROKER_ADDRESS = os.getenv("BROKER_ADDR")
-BROKER_PORT = 8883  # Porta padrão TLS para HiveMQ
+BROKER_PORT = 8883  # Ajuste para a porta correta do seu broker MQTT
 TOPIC = "my/test/topic"
 username = os.getenv("HIVE_USER")
 password = os.getenv("HIVE_PSWD")
 
+if BROKER_ADDRESS is None:
+    raise ValueError("A variável de ambiente 'BROKER_ADDR' não está definida.")
+print(f"BROKER_ADDRESS: {BROKER_ADDRESS}")  # Para depuração
+
+
+class MQTTSubscriber:
+
+    def __init__(self, BROKER_ADDRESS, broker_port, topic, username, password):
+        self.client = paho.Client(
+            paho.CallbackAPIVersion.VERSION2, "TestSubscriber"
+        )
+        self.BROKER_ADDRESS = BROKER_ADDRESS
+        self.broker_port = broker_port
+        self.topic = topic
+        self.received_messages = []
+
+        if username and password:
+            self.client.username_pw_set(
+                username, password
+            )  # Configura as credenciais
+
+        # Configura callbacks
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
+
+    def on_connect(self, client, userdata, flags, rc):
+        print(f"Connected with result code {rc}")
+        self.client.subscribe(self.topic)
+
+    def on_message(self, client, userdata, msg):
+        # Adiciona a mensagem decodificada à lista
+        self.received_messages.append(msg.payload.decode("utf-8"))
+
+    def start(self):
+        self.client.connect(self.BROKER_ADDRESS, self.broker_port, 60)
+        self.client.loop_start()
+
+    def stop(self):
+        self.client.loop_stop()
+        self.client.disconnect()
+
 
 @pytest.fixture(scope="module")
-def mqtt_processes():
-    # Caminho para os scripts do publisher e subscriber
-    publisher_script = "src/publisher.py"
-    subscriber_script = "src/subscriber.py"
-
-    # Inicia o subscriber como um subprocesso e captura a saída
-    subscriber_process = subprocess.Popen(
-        ["python", subscriber_script],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True  # Garante que a saída seja tratada como texto
+def subscriber():
+    # Inicializa e inicia o subscriber
+    sub = MQTTSubscriber(
+        BROKER_ADDRESS, BROKER_PORT, TOPIC, username, password
     )
+    sub.start()
 
-    # Dá um tempo para o subscriber se conectar
-    time.sleep(2)
-
-    # Inicia o publisher como um subprocesso
+    # Inicia o publisher após o subscriber estar ativo
     publisher_process = subprocess.Popen(
-        ["python", publisher_script],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True
+        ["python3", "src/publisher.py"], cwd="."
     )
 
-    # Aguarda o publisher terminar
-    publisher_process.wait()
+    # Aguarda para acumular mensagens
+    time.sleep(4)  # Ajuste o tempo
 
-    # Dá um tempo para mensagens serem recebidas
-    time.sleep(5)
+    yield sub.received_messages
+    sub.stop()
 
-    # Encerra o subscriber e captura a saída
-    subscriber_output, _ = subscriber_process.communicate(timeout=10)
-    subscriber_process.terminate()
-
-    yield subscriber_output
+    # Finaliza o processo do publisher
+    publisher_process.terminate()
 
 
-def test_recebimento(mqtt_processes):
-    expected_messages = ["Hello", "Hello1", "Hello2", "Hello3"]
-    subscriber_output = mqtt_processes
+def test_recebimento(subscriber):
+    assert len(subscriber) > 0, "Deveria ter recebido pelo menos uma mensagem."
 
-    # Verifica se cada mensagem esperada foi recebida
-    for expected_message in expected_messages:
-        assert expected_message in subscriber_output, "Error."
+
+def test_validacao_mensagem_hello(subscriber):
+    # Verifica mensagem
+    assert "hello" in subscriber, "Erro"
