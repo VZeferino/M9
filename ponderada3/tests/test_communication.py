@@ -59,25 +59,24 @@ class MQTTSubscriber:
 
 @pytest.fixture(scope="module")
 def subscriber():
-    # Inicializa e inicia o subscriber
     sub = MQTTSubscriber(
         BROKER_ADDRESS, BROKER_PORT, TOPIC, username, password
     )
     sub.start()
+    time.sleep(1)  # Dê um tempo
 
-    # Inicia o publisher após o subscriber estar ativo
     publisher_process = subprocess.Popen(
         ["python3", "src/publisher.py"], cwd="."
     )
 
-    # Aguarda para acumular mensagens
-    time.sleep(4)  # Ajuste o tempo
+    time.sleep(4)
 
-    yield sub.received_messages
+    received_messages = sub.received_messages.copy()
+
     sub.stop()
-
-    # Finaliza o processo do publisher
     publisher_process.terminate()
+
+    yield received_messages  # Use a cópia das mensagens
 
 
 def test_recebimento(subscriber):
