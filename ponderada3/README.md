@@ -1,18 +1,6 @@
-# MQTT Publisher & Subscriber
+# MQTT Publisher & Subscriber HIVEMQ
 
-Este projeto inclui um script Python que publica mensagens JSON em um tópico MQTT e um que recebe, utilizando o Mosquitto como broker. 
-As mensagens contêm dados simulados de medições, respeitando especificações técnicas como faixa de medição e alcance espectral.
-
-## Configuração do Mosquitto
-Você deve configurar o Mosquitto antes de iniciá-lo. 
-Supondo que você tenha um arquivo de configuração chamado mosquitto.conf, você pode iniciar o Mosquitto com a seguinte linha de comando:
-```
-
-mosquitto -c mosquitto.conf
-
-```
-
-Esse comando inicia o broker Mosquitto com as configurações definidas em mosquitto.conf.
+Este projeto inclui um script Python que publica mensagens JSON em um tópico MQTT e um que recebe, utilizando o HIVEMQ.
 
 ## Executando o Publisher
 
@@ -37,4 +25,17 @@ python3 subscriber.py
 
 Isso iniciará o script que receberá as mensagens JSON simuladas para o tópico MQTT no intervalo definido. O script imprimirá no terminal cada mensagem que for recebida.
 
-Segue vídeo para ver minha solução funcionando. Basta clicar [aqui](https://youtu.be/4m4AG9q0HKE)
+## Executando os Testes
+
+Para executar o teste, execute o seguinte comando no terminal:
+```
+
+tox run-parallel
+
+```
+
+Aqui nós executamos o pytest, flake8, mypy.
+
+obs: rodando os arquivos individualmente a conexão não apresenta erros.
+
+Segue vídeo para ver minha solução funcionando. Basta clicar [aqui](https://youtu.be/F0zHeoOlvSo)
