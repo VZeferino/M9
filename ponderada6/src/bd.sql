@@ -1,6 +1,0 @@
-CREATE TABLE Messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    topic TEXT NOT NULL,
-    payload TEXT NOT NULL,
-    received_at DATETIME NOT NULL
-);

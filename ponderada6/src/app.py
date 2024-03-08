@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
-import sqlite3
+from pymongo import MongoClient
 from datetime import datetime
 
 app = Flask(__name__)
+
+# Conexão com o MongoDB
+client = MongoClient('mongodb://localhost:27017/')
+db = client['meu_banco']
 
 # Rota para receber dados via POST e inserir no banco de dados
 @app.route('/postdata', methods=['POST'])
@@ -12,18 +16,19 @@ def post_data():
     payload = data['payload']
     received_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    document = {
+        "topic": topic,
+        "payload": payload,
+        "received_at": received_at
+    }
+
     # Inserir os dados recebidos no banco de dados SQLite
     try:
-        conn = sqlite3.connect('sensor_data.db')
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO Messages (topic, payload, received_at) VALUES (?, ?, ?)", 
-                       (topic, payload, received_at))
-        conn.commit()
+        colecao = db['minha_colecao']
+        colecao.insert_one(document)
         return jsonify({'message': 'Data inserted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    finally:
-        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
